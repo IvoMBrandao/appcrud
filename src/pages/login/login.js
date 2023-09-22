@@ -14,12 +14,13 @@ import {
 }
 from 'mdb-react-ui-kit';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import usuarioSerivce from '../../service/usuario-serivce';
 
 
 
 function Login() {
 
-  const[email,setEmail] = useState('');
+  const[email,setEmail] = useState('admin@admin.com');
   const[senha,setSenha] = useState('');
 
   const logar = () =>{
@@ -31,6 +32,16 @@ function Login() {
         })
     
       return;}
+      usuarioSerivce.Autenticar(email,senha)
+      .then(response=>{
+        console.log(response)
+        usuarioSerivce.salvarToken(response.data.token)
+        usuarioSerivce.salvarUsuario(response.data.usuario);
+          window.location='/clientes'
+      })
+      .catch(error =>{
+        console.log(error)
+      })
   };
   return (
     <MDBContainer fluid>
