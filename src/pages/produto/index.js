@@ -1,21 +1,21 @@
 import './index.css';
-import clienteService from "../../service/cliente-service"
+import ProdutoService from '../../service/produto-service';
 import Swal from 'sweetalert2'
 import { useEffect, useState } from 'react';
-import Cliente from '../../models/cliente';
+import Produtos from '../../models/produto';
 
-function ClientePage() {
+function ProdutoPage() {
 
-  const [clientes, setClientes] = useState([]);
+  const [produtos, setProdutos] = useState([]);
   const [modoEdicao, setModoEdicao] = useState(false);
-  const [cliente, setCliente] = useState(new Cliente());
+  const [produto, setProduto] = useState(new Produtos());
   
 
   useEffect(() => {
 
-    clienteService.obter()
+    ProdutoService.obter()
       .then(response => {
-        setClientes(response.data);
+        setProdutos(response.data);
       })
       .catch(erro => {
         console.log(erro);
@@ -25,20 +25,20 @@ function ClientePage() {
 
   const editar = (e) => {
     setModoEdicao(true);
-    let clienteEncontrado = clientes.find(c => c.id == e.target.id);
-    clienteEncontrado.dataCadastro = clienteEncontrado.dataCadastro.substring(0,10);
+    let produtoEncontrado = produtos.find(c => c.id == e.target.id);
+    produtoEncontrado.dataCadastro = produtoEncontrado.dataCadastro.substring(0,10);
 
-    setCliente(clienteEncontrado);
+    setProduto(produtoEncontrado);
   
   }
 
   const excluir = (e) => {
 
-    let clienteEncontrado = clientes.find(c => c.id == e.target.id);
+    let produtoEncontrado = produtos.find(c => c.id == e.target.id);
 
     Swal.fire({
-      title: 'Deseja realmente excluir o cliente?',
-      text: `Cliente: ${clienteEncontrado.nome}`,
+      title: 'Deseja realmente excluir o produto?',
+      text: `produto: ${produtoEncontrado.nome}`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#d33',
@@ -47,7 +47,7 @@ function ClientePage() {
       cancelButtonText: 'Cancelar',
     }).then((result) => {
       if (result.isConfirmed) {
-        excluirClienteBackEnd(clienteEncontrado.id);
+        excluirProdutoBackEnd(produtoEncontrado.id);
       }
     });
   };
@@ -55,19 +55,19 @@ function ClientePage() {
     setModoEdicao(false);
   };
 
-  const atualizarClienteNaTabela = (clienteAtualizado, removerCliente = false) =>{
-    let indice = clientes.findIndex((cliente) => cliente.id === clienteAtualizado.id);
+  const atualizarProdutoNaTabela = (produtoAtualizado, removerProduto = false) =>{
+    let indice = produtos.findIndex((produto) => produto.id === produtoAtualizado.id);
 
-    (removerCliente) 
-        ? clientes.splice(indice, 1)
-        : clientes.splice(indice, 1, cliente);
+    (removerProduto) 
+        ? produtos.splice(indice, 1)
+        : produtos.splice(indice, 1, produto);
 
-    setClientes(arr => [...arr]);
+    setProdutos(arr => [...arr]);
   }
 
   const salvar = () => {
 
-    if (!cliente.nome || !cliente.cpfOuCnpj || !cliente.email) {
+    if (!produto.nome || !produto.valor ) {
       Swal.fire({
         icon: 'error',
         text: 'E-mail e CPF são obrigatórios.'
@@ -75,21 +75,21 @@ function ClientePage() {
       return;
     }
 
-    (modoEdicao) ? atualizarClienteBackend(cliente) : adicionarClienteBackend(cliente);
+    (modoEdicao) ? atualizarProdutoBackend(produto) : adicionarProdutoBackend(produto);
   };
 
-  const adicionarClienteBackend = (cliente) => {
-    clienteService.adicionar(cliente)
+  const adicionarProdutoBackend = (produto) => {
+    ProdutoService.adicionar(produto)
       .then(response => {
 
-        setClientes(lista => [...lista, new Cliente(response.data)]);
+        setProdutos(lista => [...lista, new Produtos(response.data)]);
 
-        limparCliente();
+        limparProduto();
 
         Swal.fire({
           position: 'center',
           icon: 'success',
-          title: 'Cliente cadastrado com sucesso!',
+          title: 'Produto cadastrado com sucesso!',
           showConfirmButton: false,
           timer: 4500
         });
@@ -100,17 +100,17 @@ function ClientePage() {
       })
   }
 
-  const atualizarClienteBackend = (cliente) => {
-    clienteService.atualizar(cliente)
+  const atualizarProdutoBackend = (produto) => {
+    ProdutoService.atualizar(produto)
     .then(response => {
 
-      atualizarClienteNaTabela(response.data);
+      atualizarProdutoNaTabela(response.data);
 
      
       Swal.fire({
         position: 'center',
         icon: 'success',
-        title: 'Cliente atualizado com sucesso!',
+        title: 'Produto atualizado com sucesso!',
         showConfirmButton: false,
         timer: 4500
       });
@@ -121,17 +121,17 @@ function ClientePage() {
     })
   }
 
-  const excluirClienteBackEnd = (id) => {
-    clienteService.excluir(id)
+  const excluirProdutoBackEnd = (id) => {
+    ProdutoService.excluir(id)
     .then(() => {
-      let clienteEncontrado = clientes.find(c => c.id == id);
+      let produtoEncontrado = produtos.find(c => c.id == id);
 
-      atualizarClienteNaTabela(clienteEncontrado, true);
+      atualizarProdutoNaTabela(produtoEncontrado, true);
       
       Swal.fire({
         position: 'center',
         icon: 'success',
-        title: 'Cliente excluido com sucesso!',
+        title: 'Produto excluido com sucesso!',
         showConfirmButton: false,
         timer: 4500
       });
@@ -140,15 +140,14 @@ function ClientePage() {
     .catch();
   }
 
-  const limparCliente = () => {
-    setCliente({
-      ...cliente,
+  const limparProduto = () => {
+    setProduto({
+      ...produto,
       id: '',
       nome: '',
-      cpfOuCnpj: '',
-      telefone: '',
+      valor: '',
       dataCadastro: '',
-      email: ''
+      
     });
   }
 
@@ -158,7 +157,7 @@ function ClientePage() {
      
       <div className="row mt-3">
         <div className="col-sm-12">
-          <h4>Clientes</h4>
+          <h4>Produtos</h4>
           <hr />
         </div>
       </div>
@@ -169,7 +168,7 @@ function ClientePage() {
           <button
             id="btn-adicionar"
             className="btn btn-primary btn-sm"
-            data-bs-toggle="modal" data-bs-target="#modal-cliente"
+            data-bs-toggle="modal" data-bs-target="#modal-produto"
             onClick={adicionar}
           >
         Adicionar
@@ -185,35 +184,31 @@ function ClientePage() {
               <tr>
                 <th>Id</th>
                 <th>Nome</th>
-                <th>CPF</th>
-                <th>E-mail</th>
-                <th>Telefone</th>
+                <th>valor</th>
                 <th>Cadastro</th>
                 <th></th>
               </tr>
             </thead>
             <tbody>
 
-              {clientes.map(cliente => (
+              {produtos.map(produto => (
                 <tr>
-                  <td>{cliente.id}</td>
-                  <td>{cliente.nome}</td>
-                  <td>{cliente.cpfOuCnpj}</td>
-                  <td>{cliente.email}</td>
-                  <td>{cliente.telefone}</td>
-                  <td>{new Date(cliente.dataCadastro).toLocaleDateString()}</td>
+                  <td>{produto.id}</td>
+                  <td>{produto.nome}</td>
+                  <td>{produto.valor}</td>
+                  <td>{new Date(produto.dataCadastro).toLocaleDateString()}</td>
                   <td>
                     <button
 
-                      id={cliente.id}
+                      id={produto.id}
                       onClick={editar}
                       class="btn btn-outline-primary btn-sm mr-3"
                       data-bs-toggle="modal"
-                      data-bs-target="#modal-cliente">
+                      data-bs-target="#modal-produto">
                       Editar
                     </button>
                     <button
-                      id={cliente.id}
+                      id={produto.id}
                       onClick={excluir} 
                       class="btn btn-outline-primary btn-sm espacar">
                      Excluir
@@ -230,13 +225,13 @@ function ClientePage() {
      
       <div className="row">
      
-        <div className="modal fade modal-lg" id="modal-cliente">
+        <div className="modal fade modal-lg" id="modal-produto">
           <div className="modal-dialog">
             <div className="modal-content">
 
            
               <div className="modal-header">
-                <h4 className="modal-title">{modoEdicao ? "Editar cliente" : "Adicionar cliente"}</h4>
+                <h4 className="modal-title">{modoEdicao ? "Editar produto" : "Adicionar produto"}</h4>
                 <button
                   type="button"
                   className="btn-close"
@@ -255,45 +250,35 @@ function ClientePage() {
                       type="text"
                       className="form-control"
                       id="id"
-                      value={cliente.id}
+                      value={produto.id}
                    
-                      onChange={(e) => setCliente({ ...cliente, id: e.target.value })}
+                      onChange={(e) => setProduto({ ...produto, id: e.target.value })}
                     />
                   </div>
 
                   <div className="col-sm-10">
                     <label for="nome" className="form-label">Nome</label>
                     <input type="text" className="form-control" id="nome"
-                      value={cliente.nome}
-                      onChange={(e) => setCliente({ ...cliente, nome: e.target.value })}
+                      value={produto.nome}
+                      onChange={(e) => setProduto({ ...produto, nome: e.target.value })}
                     />
                   </div>
                 </div>
 
                 <div className="row">
                   <div className="col-sm-4">
-                    <label for="email" className="form-label">E-mail</label>
+                    <label for="email" className="form-label">valor</label>
                     <input type="text" className="form-control" id="email"
-                      value={cliente.email}
-                      onChange={(e) => setCliente({ ...cliente, email: e.target.value })} />
+                      value={produto.valor}
+                      onChange={(e) => setProduto({ ...produto, valor: e.target.value })} />
                   </div>
-                  <div className="col-sm-2">
-                    <label for="telefone" className="form-label">Telefone</label>
-                    <input type="text" className="form-control" id="telefone"
-                      value={cliente.telefone}
-                      onChange={(e) => setCliente({ ...cliente, telefone: e.target.value })} />
-                  </div>
-                  <div className="col-sm-3">
-                    <label for="cpf" className="form-label">CPF</label>
-                    <input type="text" className="form-control" id="cpf"
-                      value={cliente.cpfOuCnpj}
-                      onChange={(e) => setCliente({ ...cliente, cpfOuCnpj: e.target.value })} />
-                  </div>
+                 
+                 
                   <div className="col-sm-3">
                     <label for="dataCadastro" className="form-label">Data de cadastro</label>
                     <input type="date" className="form-control" id="dataCadastro" disabled
-                      value={cliente.dataCadastro}
-                      onChange={(e) => setCliente({ ...cliente, dataCadastro: e.target.value })} />
+                      value={produto.dataCadastro}
+                      onChange={(e) => setProduto({ ...produto, dataCadastro: e.target.value })} />
                   </div>
                 </div>
 
@@ -312,4 +297,4 @@ function ClientePage() {
   )
 }
 
-export default ClientePage;
+export default ProdutoPage;

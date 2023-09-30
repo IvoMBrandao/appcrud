@@ -1,5 +1,5 @@
 import axios from "axios";
-import usuarioSerivce from "./usuario-serivce";
+
 
 const service = axios.create({
     baseURL:'http://localhost:3400'});

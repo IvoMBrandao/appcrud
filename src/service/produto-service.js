@@ -1,35 +1,37 @@
 import service from "./service";
 
 
+
+
 function obter() {
 
     return new Promise((resolve, reject) => {
-        service.get('/clientes', {
+        service.get('/produtos', {
            
         })
             .then(response => resolve(response))
             .catch(erro => reject(erro))
     });
 }
- function adicionar(cliente) {
-    cliente.dataCadastro = new Date().toISOString();
+ function adicionar(produto) {
+    produto.dataCadastro = new Date().toISOString();
     return new Promise((resolve, reject) => {
-        service.post('/clientes', cliente)
+        service.post('/produtos', produto)
             .then(response => resolve(response))
             .catch(erro => reject(erro))
     })
 
 }
-function atualizar(cliente){
+function atualizar(produto){
     return new Promise((resolve, reject) => {
-        service.put(`/clientes/${cliente.id}`, cliente)
+        service.put(`/produtos/${produto.id}`, produto)
         .then(response => resolve(response))
         .catch(erro => reject(erro))
     });
 }
 function excluir(id){
     return new Promise((resolve, reject) => {
-        service.delete(`/clientes/${id}`)   
+        service.delete(`/produtos/${id}`)   
         .then(response => resolve(response))
         .catch(erro => reject(erro))
     });
